@@ -1,0 +1,67 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'coins/css/style.css' %}">
+    <script src="https://unpkg.com/vue@next"></script>
+    <title>Coin Market Cup</title>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-8 mx-auto mt-5">
+                <h3>Cryptocurrencies</h3>
+                {% verbatim %}
+                    <div id="app">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th scope="col">Rank</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Price</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="coin in coins" :key="coin.id">
+                                    <td class="align-middle">{{ coin.rank }}</td>
+                                    <td class="align-middle">
+                                        <img :src="coin.image" alt="" class="px-2" width="50">
+                                        {{ coin.name }}
+                                        <small class="text-muted px2">({{ coin.symbol }})</small>
+                                    </td>
+                                    <td class="align-middle" :class="{'raise': coin.state === 'raise', 'fall': coin.state === 'fall'}">{{ coin.price }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                {% endverbatim %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const {createApp} = Vue;
+        const CoinsApp = {
+            data() {
+                return {
+                    coin: 'Just do it',
+                    coins: null
+                }
+            },
+            created() {
+                const ws = new WebSocket(`ws://${window.location.host}/ws/coins/`)
+                let _this = this
+                ws.onmessage = function(event) {
+                    _this.coins = JSON.parse(event.data)
+                }
+            }
+        }
+
+        createApp(CoinsApp).mount('#app')
+    </script>
+</body>
+</html>
